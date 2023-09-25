@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,6 +18,12 @@ public class Anchor : MonoBehaviour
     private PlayerController player;
 
 
+    private void Awake()
+    {
+        player = GameObject.Find("Player").GetComponent<PlayerController>();
+        Debug.Log(player.name);
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -32,7 +39,8 @@ public class Anchor : MonoBehaviour
         }
         else
         {
-            StopCoroutine(RetrieveAnchor(timeToGetAnchor));
+            StopCoroutine("RetrieveAnchor");
+            player.SetMobilityWithoutAnchor();
             this.gameObject.transform.localScale = new Vector3(1.0f, 2.0f, 1.0f);
             timeGettingAnchor = 0.0f;
         }
@@ -42,15 +50,14 @@ public class Anchor : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player")) //If other Game Object is Player
         {
-            player = other.GetComponent<PlayerController>();
+           
             isOnRange = true;
         }
-        else if(dealDamage && other.gameObject.CompareTag("Enemy"))
+        else if (dealDamage && other.gameObject.CompareTag("Enemy"))
         {
             Debug.Log("Deal 2 Damage points to enemy");
             other.GetComponent<HealthManager>().DealDamage(damageToEnemies);
         }
-       
     }
 
     private void OnTriggerExit(Collider other)
@@ -69,6 +76,8 @@ public class Anchor : MonoBehaviour
 
     IEnumerator RetrieveAnchor(float time) //Does not wait what expected
     {
+        player.SetMobilityRetrievingAnchor();
+        player.SetCanThrowAnchor(false);
         do
         {
             timeGettingAnchor += Time.deltaTime;
@@ -78,10 +87,18 @@ public class Anchor : MonoBehaviour
 
         } while(timeGettingAnchor < time);
         
-        
-        //player.GetAnchor();
+        player.GetAnchor();
         timeGettingAnchor = 0.0f;
-        Destroy(this.gameObject);
 
+        this.gameObject.transform.position = new Vector3(this.gameObject.transform.position.x,
+            this.gameObject.transform.position.y - 5.0f, this.gameObject.transform.position.z);
+        StartCoroutine(SetCanThrowAnchor());
+    }
+
+    IEnumerator SetCanThrowAnchor()
+    {
+        yield return new WaitForSeconds(0.25f);
+        player.SetCanThrowAnchor(true);
+        Destroy(this.gameObject);
     }
 }

@@ -90,7 +90,7 @@ public class BasicEnemyController : MonoBehaviour
 
         //TODO Dash to the player
         Debug.Log("Enemy Attacking");
-        enemyRigidBody.AddForce(this.gameObject.transform.forward * dashVelocity, ForceMode.Acceleration);
+        enemyRigidBody.AddForce(this.gameObject.transform.forward * dashVelocity, ForceMode.Impulse);
 
         attacking = false;
     }

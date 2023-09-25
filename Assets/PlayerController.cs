@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float currentVelocity = 1.0f;
     [SerializeField] private float velocityWithAnchor = 1.0f;
     [SerializeField] private float velocityWithoutAnchor = 1.25f;
+    [SerializeField] private float velocityRetrievingAnchor = 0.75f;
 
 
     [Header("Player Attack")]
@@ -37,7 +38,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float timeToChargeAtMaxRange = 1.5f;
     private bool chargingHeavyAttack = false;
     private bool arrivedMaxRange = false;
+    private bool canThrowAnchor = true;
     private float timeCharging = 0.0f;
+    private Vector3 anchorPoint;
 
     public void Update()
     {
@@ -47,13 +50,14 @@ public class PlayerController : MonoBehaviour
         //Rotate Body to Look to the pointing axis
         playerObject.transform.LookAt(new Vector3(playerObject.transform.position.x + movementInput.x,playerObject.transform.position.y,playerObject.transform.position.z + movementInput.y));
 
-        if (Gamepad.current.leftTrigger.IsPressed() && !arrivedMaxRange && hasAnchor)
+        if (Gamepad.current.leftTrigger.IsPressed() && !arrivedMaxRange && hasAnchor && canThrowAnchor)
         {
             //Heavy Attack
+            SetMobilityRetrievingAnchor();
             chargingHeavyAttack = true;
             timeCharging += Time.deltaTime;
             Debug.Log("Charging Heavy Attack");
-            float indicatorIncreaser = maxRange / 1.5f;
+            float indicatorIncreaser = maxRange / timeToChargeAtMaxRange;
             heavyAttackRangeIndicator.SetActive(true);
             heavyAttackRangeIndicator.transform.localScale = new Vector3(indicatorIncreaser * timeCharging, 1.0f ,1.0f );
             Debug.Log("Indicator increaser " + indicatorIncreaser + " Time Charging: " + timeCharging);
@@ -65,11 +69,16 @@ public class PlayerController : MonoBehaviour
                 timeCharging = 1.5f;
             }
         }
+        else if (Gamepad.current.rightTrigger.IsPressed() && !attacking && hasAnchor)
+        {
+            Debug.Log("attack");
+            StartCoroutine(ShowAttackZone());
+        }
         else if (chargingHeavyAttack)
         {
             Debug.Log("Throwing Anchor");
             //Stop charging and throw heavy attack
-            currentVelocity = velocityWithoutAnchor;
+            SetMobilityWithoutAnchor();
             hasAnchor = false;
             chargingHeavyAttack = false;
             arrivedMaxRange = false;
@@ -77,14 +86,16 @@ public class PlayerController : MonoBehaviour
             //Throw the anchor to the looking vector of the player + reset timeCharging
             Vector3 chargedAttackOffset = (this.gameObject.transform.GetChild(0).GetChild(3).transform.right * -heavyAttackRangeIndicator.transform.localScale.x);
             Debug.Log(chargedAttackOffset);
-            Vector3 anchorPoint = this.gameObject.transform.position + chargedAttackOffset;
+            anchorPoint = this.gameObject.transform.position + chargedAttackOffset;
             timeCharging = 0.0f;
             heavyAttackRangeIndicator.SetActive(false);
             heavyAttackRangeIndicator.transform.localScale = new Vector3(1.0f, 1.0f , 1.0f);
-            Instantiate(anchorObject, anchorPoint, Quaternion.identity);
             
+            Instantiate(anchorObject, anchorPoint, Quaternion.identity);
+
         }
     }
+    
 
     public void GetAnchor()
     {
@@ -92,11 +103,22 @@ public class PlayerController : MonoBehaviour
         currentVelocity = velocityWithAnchor;
     }
 
-    public void Attack()
+    public void SetMobilityWithAnchor()
     {
-        if (attacking || !hasAnchor) return;
-        Debug.Log("attack");
-        StartCoroutine(ShowAttackZone());
+        currentVelocity = velocityWithAnchor;
+    }
+    public void SetMobilityWithoutAnchor()
+    {
+        currentVelocity = velocityWithoutAnchor;
+    }
+    public void SetMobilityRetrievingAnchor()
+    {
+        currentVelocity = velocityRetrievingAnchor;
+    }
+
+    public void SetCanThrowAnchor(bool value)
+    {
+        canThrowAnchor = value;
     }
 
     public void HeavyAttack()
