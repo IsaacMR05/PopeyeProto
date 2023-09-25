@@ -16,9 +16,9 @@ public class PlayerController : MonoBehaviour
     [Header("Player Movement")]
     [SerializeField] private GameObject playerObject;
     [SerializeField] private Rigidbody playerRigidBody;
-    [SerializeField] private float currentMovementForce = 1.0f;
-    [SerializeField] private float movementForceWithAnchor = 1.0f;
-    [SerializeField] private float movementForceWithoutAnchor = 1.25f;
+    [SerializeField] private float currentVelocity = 1.0f;
+    [SerializeField] private float velocityWithAnchor = 1.0f;
+    [SerializeField] private float velocityWithoutAnchor = 1.25f;
 
 
     [Header("Player Attack")]
@@ -42,9 +42,8 @@ public class PlayerController : MonoBehaviour
     public void Update()
     {
         Vector2 movementInput = Gamepad.current.leftStick.ReadValue() * -1;
-        Vector3 forceToApply = new Vector3(movementInput.y * -1, 0.0f, movementInput.x) * currentMovementForce;
-        playerRigidBody.AddForce(forceToApply, ForceMode.VelocityChange);
-        
+        Vector3 velocityToApply = new Vector3(movementInput.y * -1, 0.0f, movementInput.x) * currentVelocity;
+        playerRigidBody.velocity = velocityToApply;
         //Rotate Body to Look to the pointing axis
         playerObject.transform.LookAt(new Vector3(playerObject.transform.position.x + movementInput.x,playerObject.transform.position.y,playerObject.transform.position.z + movementInput.y));
 
@@ -70,13 +69,13 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("Throwing Anchor");
             //Stop charging and throw heavy attack
-            currentMovementForce = movementForceWithoutAnchor;
+            currentVelocity = velocityWithoutAnchor;
             hasAnchor = false;
             chargingHeavyAttack = false;
             arrivedMaxRange = false;
 
             //Throw the anchor to the looking vector of the player + reset timeCharging
-            Vector3 chargedAttackOffset = (this.gameObject.transform.forward * heavyAttackRangeIndicator.transform.localScale.x);
+            Vector3 chargedAttackOffset = (this.gameObject.transform.GetChild(0).GetChild(3).transform.right * -heavyAttackRangeIndicator.transform.localScale.x);
             Debug.Log(chargedAttackOffset);
             Vector3 anchorPoint = this.gameObject.transform.position + chargedAttackOffset;
             timeCharging = 0.0f;
@@ -90,6 +89,7 @@ public class PlayerController : MonoBehaviour
     public void GetAnchor()
     {
         hasAnchor = true;
+        currentVelocity = velocityWithAnchor;
     }
 
     public void Attack()

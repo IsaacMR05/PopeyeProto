@@ -183,8 +183,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b776a8059e4a464784f5df0a5251985, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeToGetAnchor: 1.5
+  timeToGetAnchor: 5
   damageToEnemies: 2
+  seconsToDealDamage: 0.1
 --- !u!65 &5106681845431096534
 BoxCollider:
   m_ObjectHideFlags: 0
