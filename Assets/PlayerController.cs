@@ -50,7 +50,7 @@ public class PlayerController : MonoBehaviour
         //Rotate Body to Look to the pointing axis
         playerObject.transform.LookAt(new Vector3(playerObject.transform.position.x + movementInput.x,playerObject.transform.position.y,playerObject.transform.position.z + movementInput.y));
 
-        if (Gamepad.current.leftTrigger.IsPressed() && !arrivedMaxRange && hasAnchor && canThrowAnchor)
+        /*if (Gamepad.current.leftTrigger.IsPressed() && !arrivedMaxRange && hasAnchor && canThrowAnchor)
         {
             //Heavy Attack
             SetMobilityRetrievingAnchor();
@@ -93,7 +93,7 @@ public class PlayerController : MonoBehaviour
             
             Instantiate(anchorObject, anchorPoint, Quaternion.identity);
 
-        }
+        }*/
     }
     
 
