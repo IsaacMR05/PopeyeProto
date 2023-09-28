@@ -44,8 +44,8 @@ public class PlayerController : MonoBehaviour
 
     public void Update()
     {
-        Vector2 movementInput = Gamepad.current.leftStick.ReadValue() * -1;
-        Vector3 velocityToApply = new Vector3(movementInput.y * -1, 0.0f, movementInput.x) * currentVelocity;
+        Vector2 movementInput = Gamepad.current.leftStick.ReadValue();
+        Vector3 velocityToApply = new Vector3(movementInput.x, 0.0f, movementInput.y) * currentVelocity;
         playerRigidBody.velocity = velocityToApply;
         //Rotate Body to Look to the pointing axis
         playerObject.transform.LookAt(new Vector3(playerObject.transform.position.x + movementInput.x,playerObject.transform.position.y,playerObject.transform.position.z + movementInput.y));
