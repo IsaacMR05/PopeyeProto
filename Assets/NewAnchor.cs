@@ -115,7 +115,7 @@ public class NewAnchor : MonoBehaviour
             case AnchorState.RETRIEVING:
             { 
                 //If anchor is close enough to player, set anchor state to WITH_PLAYER and reset velocity
-                if (Vector3.Distance(this.transform.position, playerTransform.position) < 0.2f)
+                if (Vector3.Distance(this.transform.position, playerTransform.position) < 1.0f)
                 {
                     anchorState = AnchorState.WITH_PLAYER;
                     anchorRB.velocity = Vector3.zero;
@@ -123,8 +123,8 @@ public class NewAnchor : MonoBehaviour
                 else //Update anchor velocity to go to the playey
                 {
                     //Calculate the velocity to retrieve anchor to its max distance in wanted time (x = initial x + velocity * time) --> velocity = (x - initial x) / time
-                    Vector3 finalPos = playerTransform.position - this.gameObject.transform.position * maxRangeThrowing;
-                    Vector3 newVelocity = (finalPos - this.gameObject.transform.position) / throwTimeToMaxRange;
+                    Vector3 finalPos = (bodyTransform.position - this.gameObject.transform.position) * maxRangeThrowing;
+                    Vector3 newVelocity = -1 * (finalPos - this.gameObject.transform.position) / throwTimeToMaxRange;
                     anchorRB.velocity = new Vector3(newVelocity.x, 0.0f, newVelocity.z);
                     anchorDesiredPosition = finalPos;
                 }
@@ -144,7 +144,7 @@ public class NewAnchor : MonoBehaviour
                 {
                     canRetrieve = false;
                     //Calculate the velocity to throw anchor to its max distance in wanted time (x = initial x + velocity * time) --> velocity = (x - initial x) / time
-                    Vector3 finalPos = bodyTransform.forward * maxRangeThrowing;
+                    Vector3 finalPos = (bodyTransform.forward * maxRangeThrowing) + bodyTransform.position;
                     Vector3 newVelocity = (finalPos - this.gameObject.transform.position) / throwTimeToMaxRange;
                     anchorRB.velocity = new Vector3(newVelocity.x, 0.0f, newVelocity.z);
                     
@@ -160,8 +160,8 @@ public class NewAnchor : MonoBehaviour
                 { //Start Retrieving
                     if (!canRetrieve) return;
                     //Calculate the velocity to retrieve anchor to its max distance in wanted time (x = initial x + velocity * time) --> velocity = (x - initial x) / time
-                    Vector3 finalPos = playerTransform.position - this.gameObject.transform.position * maxRangeThrowing;
-                    Vector3 newVelocity = (finalPos - this.gameObject.transform.position) / throwTimeToMaxRange;
+                    Vector3 finalPos = (bodyTransform.position - this.gameObject.transform.position) * maxRangeThrowing;
+                    Vector3 newVelocity = -1 * (finalPos - this.gameObject.transform.position) / throwTimeToMaxRange;
                     anchorRB.velocity = new Vector3(newVelocity.x, 0.0f, newVelocity.z);
                     
                     //Set anchor state to retrieving
