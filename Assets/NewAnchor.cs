@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;using UnityEditor.UI;
 using UnityEngine;
@@ -32,6 +33,7 @@ public class NewAnchor : MonoBehaviour
     private AnchorState anchorState = AnchorState.WITH_PLAYER; //Change to WITH_PLAYER when not debugging
     private Vector3 previousPlayerPosition;
     private bool canRetrieve = true;
+    private bool canThrow = true;
 
     
     [Header("WTF")]
@@ -123,8 +125,8 @@ public class NewAnchor : MonoBehaviour
                 else //Update anchor velocity to go to the playey
                 {
                     //Calculate the velocity to retrieve anchor to its max distance in wanted time (x = initial x + velocity * time) --> velocity = (x - initial x) / time
-                    Vector3 finalPos = (bodyTransform.position - this.gameObject.transform.position) * maxRangeThrowing;
-                    Vector3 newVelocity = -1 * (finalPos - this.gameObject.transform.position) / throwTimeToMaxRange;
+                    Vector3 finalPos = ((bodyTransform.position - this.gameObject.transform.position) * maxRangeThrowing) + bodyTransform.position;
+                    Vector3 newVelocity = (finalPos - this.gameObject.transform.position) / retrieveTimeToMaxRange;
                     anchorRB.velocity = new Vector3(newVelocity.x, 0.0f, newVelocity.z);
                     anchorDesiredPosition = finalPos;
                 }
@@ -142,7 +144,9 @@ public class NewAnchor : MonoBehaviour
             {
                 case AnchorState.WITH_PLAYER: //The anchor is with the player --> Will throw its anchor
                 {
+                    if (!canThrow) return;
                     canRetrieve = false;
+                    canThrow = false;
                     //Calculate the velocity to throw anchor to its max distance in wanted time (x = initial x + velocity * time) --> velocity = (x - initial x) / time
                     Vector3 finalPos = (bodyTransform.forward * maxRangeThrowing) + bodyTransform.position;
                     Vector3 newVelocity = (finalPos - this.gameObject.transform.position) / throwTimeToMaxRange;
@@ -160,8 +164,8 @@ public class NewAnchor : MonoBehaviour
                 { //Start Retrieving
                     if (!canRetrieve) return;
                     //Calculate the velocity to retrieve anchor to its max distance in wanted time (x = initial x + velocity * time) --> velocity = (x - initial x) / time
-                    Vector3 finalPos = (bodyTransform.position - this.gameObject.transform.position) * maxRangeThrowing;
-                    Vector3 newVelocity = -1 * (finalPos - this.gameObject.transform.position) / throwTimeToMaxRange;
+                    Vector3 finalPos = ((bodyTransform.position - this.gameObject.transform.position) * maxRangeThrowing) + bodyTransform.position;
+                    Vector3 newVelocity = (finalPos - this.gameObject.transform.position) / retrieveTimeToMaxRange;
                     anchorRB.velocity = new Vector3(newVelocity.x, 0.0f, newVelocity.z);
                     
                     //Set anchor state to retrieving
@@ -177,6 +181,38 @@ public class NewAnchor : MonoBehaviour
         else
         {
             canRetrieve = true;
+            if(anchorState == AnchorState.WITH_PLAYER)
+                canThrow = true;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Enemy")) //If Enemy enters to trigger
+        {
+            Rigidbody enemyRB = other.gameObject.GetComponent<Rigidbody>();
+   
+            //Check in which state anchor is
+            switch (anchorState)
+            {
+                case AnchorState.THROWING:
+                {
+                    //Add knockback to the enemy
+                    enemyRB.AddForce(anchorRB.velocity.normalized * throwKnockBackForce, ForceMode.Impulse);
+                    Debug.Log("Knockbacked enemy");
+                    
+                    //Deal Damage
+                    break;
+                }
+                case AnchorState.RETRIEVING:
+                {
+                    //Add knockback to the enemy
+                    enemyRB.AddForce(anchorRB.velocity.normalized * retrieveKnockBackForce, ForceMode.Impulse);
+                    Debug.Log("Knockbacked enemy");
+                    //Deal Damage
+                    break;
+                }
+            }
         }
     }
 }
