@@ -17,7 +17,8 @@ public class BasicEnemyController : MonoBehaviour
     
     [Header("Enemy Attack")]
     [SerializeField] private int attackDamage = 1;
-    [SerializeField] private float timeToAttackSinceDetection = 2;
+    [SerializeField] private float timeToAttackSinceDetection = 2.0f;
+    [SerializeField] private float timeBetweenAttacks = 2.0f;
     [SerializeField] private int timesToShowAttackArea = 10;
     [SerializeField] private SphereCollider detectionArea;
     [SerializeField] private GameObject weaponObject;
@@ -51,7 +52,15 @@ public class BasicEnemyController : MonoBehaviour
             Debug.Log("Enemy Attacking");
         }
     }
-    
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player")) //If Detects Player
+        {
+            collision.gameObject.GetComponent<HealthManager>().DealDamage(attackDamage);
+        }
+    }
+
     IEnumerator Attack()
     {
         attacking = true;
@@ -92,6 +101,7 @@ public class BasicEnemyController : MonoBehaviour
         Debug.Log("Enemy Attacking");
         enemyRigidBody.AddForce(this.gameObject.transform.forward * dashVelocity, ForceMode.Impulse);
 
+        yield return new WaitForSeconds(timeBetweenAttacks);
         attacking = false;
     }
 }

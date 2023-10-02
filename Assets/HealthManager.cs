@@ -1,8 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public class HealthManager : MonoBehaviour 
 {
@@ -10,11 +13,18 @@ public class HealthManager : MonoBehaviour
     [SerializeField] private int healthPoints;
     [SerializeField] private int maxHealthPoints;
     [SerializeField] private float invencibilityTime = 0.2f;
+    [SerializeField] private Image healthBar;
 
 
     [SerializeField] private bool isPlayer;
     private bool isInvencible;
 
+
+    private void Update()
+    {
+        if(Keyboard.current.spaceKey.IsPressed())
+            DealDamage(5);
+    }
 
     public void DealDamage(int damagePoints)
     {
@@ -26,6 +36,11 @@ public class HealthManager : MonoBehaviour
             return;
         }
 
+        if (isPlayer)
+        {
+            healthBar.fillAmount = (float)healthPoints / (float)maxHealthPoints;
+        }
+
         StartCoroutine(Invencibility());
     }
 
@@ -33,6 +48,10 @@ public class HealthManager : MonoBehaviour
     {
         healthPoints += healPoints;
         if(healthPoints > maxHealthPoints) healthPoints = maxHealthPoints;
+        if (isPlayer)
+        {
+            healthBar.fillAmount = (float)healthPoints / (float)maxHealthPoints;
+        }
     }
 
     public void Death()
